@@ -73,10 +73,13 @@ where status = 'PAID'
 Group by store_id;
 -- Q8) Which day of week has the highest number of PAID orders?
 --     Return (day_name, orders_count). Hint: DAYNAME(order_datetime). Return ties if any.
-select order_datetime, count(*) as orders_count
+select 
+	dayname(order_datetime) as day_name, 
+	count(status) as orders_count
 From orders
 where status = 'PAID'
-Group by; 
+Group by day_name, orders_count; 
+
 -- Q9) Show the calendar days whose total orders (any status) exceed 3.
 --     Use HAVING. Return (order_date, orders_count).
 SELECT 
@@ -91,11 +94,17 @@ SELECT
 	store_id, payment_method, COUNT(*) as paid_orders_count
 FROM orders
 Where status = 'PAID'
-group by store_id, payment_method
+group by store_id, payment_method;
 
 -- Q11) Among PAID orders, what percent used 'app' as the payment_method?
 --      Return a single row with pct_app_paid_orders (0–100).
+SELECT
+	Round( 100* SUM(CASE WHEN payment_method = 'app' THEN 1 ELSE 0 END)
+    / COUNT(*), 2) AS pct_app_paid_orders 
+FROM orders
+Where status = 'PAID';
 
+	
 -- Q12) Busiest hour: for PAID orders, show (hour_of_day, orders_count) sorted desc.
 
 
