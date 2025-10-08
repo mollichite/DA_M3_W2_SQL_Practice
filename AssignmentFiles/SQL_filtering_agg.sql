@@ -32,25 +32,66 @@ order by order_date;
 
 -- Q4) What is the average number of items per PAID order?
 --     Use a subquery or CTE over order_items filtered by order_id IN (...).
-select 
+SELECT 
+  AVG(total_items) AS avg_items_per_paid_order
+FROM 
+  (SELECT 
+    oi.order_id,
+    COUNT(*) AS total_items
+  FROM 
+    order_items oi
+  JOIN 
+    orders o ON oi.order_id = o.order_id
+  WHERE 
+    o.status = 'paid'
+  GROUP BY 
+    oi.order_id)
+AS paid_order_counts;
 -- Q5) Which products (by product_id) have sold the most units overall across all stores?
 --     Return (product_id, total_units), sorted desc.
-
+SELECT product_id, SUM(quantity) AS total_units
+FROM order_items
+Group by product_id
+order by total_units desc;
 -- Q6) Among PAID orders only, which product_ids have the most units sold?
 --     Return (product_id, total_units_paid), sorted desc.
 --     Hint: order_id IN (SELECT order_id FROM orders WHERE status='paid').
-
+SELECT product_id, SUM(quantity) AS total_units
+FROM order_items
+WHERE
+	order_id IN(
+    SELECT order_id 
+    FROM orders 
+    WHERE status='paid')
+Group by product_id
+Order by total_units DESC; 
 -- Q7) For each store, how many UNIQUE customers have placed a PAID order?
 --     Return (store_id, unique_customers) using only the orders table.
-
+select store_id, count(distinct customer_id) as unique_customers
+From orders
+where status = 'PAID'
+Group by store_id;
 -- Q8) Which day of week has the highest number of PAID orders?
 --     Return (day_name, orders_count). Hint: DAYNAME(order_datetime). Return ties if any.
-
+select order_datetime, count(*) as orders_count
+From orders
+where status = 'PAID'
+Group by; 
 -- Q9) Show the calendar days whose total orders (any status) exceed 3.
 --     Use HAVING. Return (order_date, orders_count).
-
+SELECT 
+	DATE(order_datetime) as order_date, 
+    COUNT(order_id) as orders_count
+FROM orders
+group by DATE(order_datetime)
+HAVING COUNT(*) > 3;
 -- Q10) Per store, list payment_method and the number of PAID orders.
 --      Return (store_id, payment_method, paid_orders_count).
+SELECT 
+	store_id, payment_method, COUNT(*) as paid_orders_count
+FROM orders
+Where status = 'PAID'
+group by store_id, payment_method
 
 -- Q11) Among PAID orders, what percent used 'app' as the payment_method?
 --      Return a single row with pct_app_paid_orders (0–100).
